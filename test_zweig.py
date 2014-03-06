@@ -8,11 +8,23 @@
 """
 from __future__ import unicode_literals
 import ast
+import sys
 import textwrap
 
 import pytest
 
 import zweig
+
+
+only_python2 = pytest.mark.skipif(
+    sys.version_info[0] > 2,
+    reason='only python 2'
+)
+
+min_python3 = pytest.mark.skipif(
+    sys.version_info[0] < 3,
+    reason='requires python 3'
+)
 
 
 def test_walk_preorder():
@@ -70,3 +82,384 @@ def test_walk_preorder():
 
     with pytest.raises(StopIteration):
         next(nodes)
+
+
+@pytest.mark.parametrize('source', [
+    """
+        def argumentless():
+            pass
+    """,
+    """
+        def single_positional(foo):
+            return
+    """,
+    """
+        def two_positional(foo, bar):
+            return None
+    """,
+    """
+        def defaults(foo, bar=1):
+            global something
+            global foo, bar
+    """,
+    """
+        def arbitrary_arguments(*args):
+            yield
+    """,
+    """
+        def kwargs(**kwargs):
+            yield something
+    """,
+    """
+        @foo
+        def single_decorator():
+            pass
+    """,
+    """
+        @foo
+        @bar
+        def multiple_decorators():
+            pass
+    """,
+    """
+        class NoBase:
+            pass
+    """,
+    """
+        class SingleBase(object):
+            pass
+    """,
+    """
+        class MultipleBases(Foo, Bar):
+            pass
+    """,
+    """
+        @foo
+        class SingleDecorator:
+            pass
+    """,
+    """
+        @foo
+        @bar
+        class MultipleDecorators:
+            pass
+    """,
+    """
+        del something
+        del something, another_thing
+    """,
+    """
+        foo = something
+        foo = bar = baz
+    """,
+    """
+        foo += bar
+        foo -= bar
+        foo *= bar
+        foo /= bar
+        foo %= bar
+        foo **= bar
+        foo <<= bar
+        foo >>= bar
+        foo |= bar
+        foo ^= bar
+        foo &= bar
+        foo //= bar
+    """,
+    """
+        for whatever in whatevers:
+            if blubb:
+                continue
+            else:
+                break
+        for spam in spams:
+            pass
+        else:
+            pass
+    """,
+    """
+        while True:
+            pass
+        while True:
+            pass
+        else:
+            pass
+    """,
+    """
+        with foo:
+            pass
+        with foo as bar:
+            pass
+    """,
+    """
+        try:
+            pass
+        except:
+            pass
+        except Something:
+            pass
+        except Something as AnotherThing:
+            pass
+        try:
+            pass
+        except:
+            pass
+        else:
+            pass
+        try:
+            pass
+        finally:
+            pass
+    """,
+    """
+        assert something
+        assert something, message
+    """,
+    """
+        import foo
+        import foo, bar
+        import spam as eggs
+        from . import foo
+        from foo import bar
+        from foo import bar, baz
+        from foo import spam as eggs
+    """,
+    """
+        foo or bar
+        foo or bar or baz
+        foo and bar
+        foo and bar and baz
+        foo and bar or baz
+        foo and (bar or baz)
+        foo or bar and baz
+        (foo or bar) and baz
+        not foo
+        not foo and not bar
+    """,
+    """
+        (foo or bar) and baz
+        foo and (bar or baz)
+        not (foo or bar)
+        not (foo and bar)
+    """,
+    """
+        1 + 1
+        1 - 1
+        1 * 1
+        1 / 1
+        1 % 1
+        1 << 1
+        1 >> 1
+        1 | 1
+        1 ^ 1
+        1 & 1
+        1 // 1
+    """,
+    """
+        1 + (1 - 1)
+        1 - (1 + 1)
+        (1 - 1) + 1
+        (1 + 1) - 1
+    """,
+    """
+        1 * (1 / 1)
+        1 * (1 // 1)
+        1 / (1 * 1)
+        1 // (1 * 1)
+        1 % (1 * 1)
+    """,
+    """
+        (1 / 1) * 1
+        (1 // 1) * 1
+        (1 * 1) / 1
+        (1 * 1) // 1
+        (1 * 1) % 1
+        (1 % 1) * 1
+        (1 % 1) / 1
+        (1 % 1) // 1
+    """,
+    """
+        1 * (1 + 1)
+        1 * (1 - 1)
+        1 / (1 + 1)
+        1 / (1 - 1)
+        1 // (1 + 1)
+        1 // (1 - 1)
+        1 % (1 + 1)
+        1 % (1 - 1)
+    """,
+    """
+        (1 + 1) * 1
+        (1 - 1) * 1
+        (1 + 1) / 1
+        (1 - 1) / 1
+        (1 + 1) // 1
+        (1 - 1) // 1
+        (1 + 1) % 1
+        (1 - 1) % 1
+    """,
+    """
+        ~1
+        not 1
+        +1
+        -1
+    """,
+    """
+        +(1 + 1)
+        -(1 + 1)
+        ~(1 + 1)
+    """,
+    """
+        1 ** 1
+        -1 ** 1
+        1 ** -1
+        (-1) ** 1
+    """,
+    """
+        lambda : None
+        lambda foo: None
+        lambda foo, bar: None
+        lambda : None if False else 'foo'
+        (lambda : None) if False else 'foo'
+    """,
+    """
+        foo if condition else bar
+        foo if condition else bar if True else baz
+        spam if (bar if True else baz) else eggs
+    """,
+    """
+        {}
+        {key: value}
+        {key: value, another_key: another_value}
+    """,
+    """
+        {element}
+        {element, another_element}
+    """,
+    """
+        [item for item in foo]
+        [item for item in foo if something]
+        [subitem for item in foo for subitem in item]
+    """,
+    """
+        {item for item in foo}
+        {item for item in foo if something}
+        {subitem for item in foo for subitem in item}
+    """,
+    """
+        {key: value for key, value in foo}
+        {key: value for key, value in foo if value}
+    """,
+    """
+        (item for item in foo)
+    """,
+    """
+        1 == 1
+        1 != 1
+        1 < 1
+        1 <= 1
+        1 > 1
+        1 >= 1
+        1 is 1
+        1 is not 1
+        1 in foo
+        1 not in foo
+    """,
+    """
+        func()
+        func(foo, bar)
+        func(*args)
+        func(**kwargs)
+        func(foo=bar)
+        (foo + bar)()
+    """,
+    """
+        'string'
+    """,
+    """
+        foo.bar
+        foo.bar.baz
+        (foo + bar).baz
+    """,
+    """
+        foo[index]
+        foo[:]
+        foo[start:]
+        foo[:stop]
+        foo[start:stop]
+        foo[::step]
+        foo[start::step]
+        foo[:stop:step]
+        foo[start:stop:step]
+        foo[bar][baz]
+        (foo + bar)[index]
+    """
+])
+def test_to_source(source):
+    source = textwrap.dedent(source).lstrip()
+    tree = ast.parse(source)
+    result = zweig.to_source(tree)
+    assert result == source
+
+
+@only_python2
+def test_to_source_2():
+    source = textwrap.dedent("""\
+    print
+    print foo
+    print foo, bar
+    print foo, bar,
+    raise
+    raise value
+    raise type, value
+    raise type, value, tb
+    `'foo'`
+    """)
+    tree = ast.parse(source)
+    result = zweig.to_source(tree)
+    assert result == source
+
+
+@min_python3
+def test_to_source_3():
+    source = textwrap.dedent("""\
+        def single_positonal(foo: annotation):
+            nonlocal foo
+            nonlocal foo, bar
+
+        def return_annotation() -> foo:
+            yield from foo
+
+        def kwonly(*, foo):
+            pass
+
+        def kwonly_starargs(*, foo=bar):
+            pass
+
+        def kwonly_kwargs(*, foo=bar, **kwargs):
+            pass
+
+        class Keywords(foo=bar):
+            pass
+
+        class Starargs(*args):
+            pass
+
+        class Kwargs(**kwargs):
+            pass
+
+        class AllArgs(foo=bar, *args, **kwargs):
+            pass
+
+        raise
+        raise value
+        raise value from cause
+        b'bytes'
+        ...
+        *foo = bar
+        foo = []
+        foo = [1, 2]
+    """)
+    tree = ast.parse(source)
+    result = zweig.to_source(tree)
+    assert result == source
