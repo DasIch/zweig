@@ -803,3 +803,43 @@ def _requires_parentheses(parent, child):
     parent, child = _normalize(parent), _normalize(child)
     lower, equal = _node2lower_equal_upper_nodes[parent][:2]
     return child in lower | equal
+
+
+def dump(node, annotate_fields=True, include_attributes=False):
+    """
+    Like :func:`ast.dump` but with a more readable return value, making the
+    output actually useful for debugging purposes.
+    """
+    def _format(node, level=0):
+        if isinstance(node, ast.AST):
+            fields = [
+                (name, _format(value, level))
+                for name, value in ast.iter_fields(node)
+            ]
+            if include_attributes and node._attributes:
+                fields.extend((name, _format(getattr(node, name), level))
+                               for name in node._attributes)
+            return '{}({})'.format(
+                node.__class__.__name__,
+                ', '.join(
+                    map('='.join, fields)
+                    if annotate_fields else
+                    (value for _, value in fields)
+                )
+            )
+        elif isinstance(node, list):
+            if node:
+                indentation = '    ' * (level + 1)
+                lines = ['[']
+                lines.extend(
+                    indentation + _format(n, level + 1) + ',' for n in node
+                )
+                lines.append(indentation + ']')
+                return '\n'.join(lines)
+            return '[]'
+        return repr(node).decode('ascii') if PY2 else repr(node)
+    if not isinstance(node, ast.AST):
+        raise TypeError(
+            'expected AST, got {!r}'.format(node.__class__.__name__)
+        )
+    return _format(node)

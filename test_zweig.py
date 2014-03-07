@@ -463,3 +463,28 @@ def test_to_source_3():
     tree = ast.parse(source)
     result = zweig.to_source(tree)
     assert result == source
+
+
+def test_dump():
+    tree = ast.parse('spam(eggs, "and cheese")')
+    assert zweig.dump(tree) == textwrap.dedent("""\
+        Module(body=[
+            Expr(value=Call(func=Name(id='spam', ctx=Load()), args=[
+                Name(id='eggs', ctx=Load()),
+                Str(s='and cheese'),
+                ], keywords=[], starargs=None, kwargs=None)),
+            ])""")
+    assert zweig.dump(tree, annotate_fields=False) == textwrap.dedent("""\
+        Module([
+            Expr(Call(Name('spam', Load()), [
+                Name('eggs', Load()),
+                Str('and cheese'),
+                ], [], None, None)),
+            ])""")
+    assert zweig.dump(tree, include_attributes=True) == textwrap.dedent("""\
+        Module(body=[
+            Expr(value=Call(func=Name(id='spam', ctx=Load(), lineno=1, col_offset=0), args=[
+                Name(id='eggs', ctx=Load(), lineno=1, col_offset=5),
+                Str(s='and cheese', lineno=1, col_offset=11),
+                ], keywords=[], starargs=None, kwargs=None, lineno=1, col_offset=0), lineno=1, col_offset=0),
+            ])""")
