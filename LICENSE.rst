@@ -1,5 +1,5 @@
 License
-=======
+-------
 
 Copyright (c) 2014 by Daniel Neuhäuser
 

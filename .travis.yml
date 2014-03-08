@@ -6,12 +6,13 @@ python:
 env:
   matrix:
     - TOX_ENV=packaging
+    - TOX_ENV=docs
     - TOX_ENV=py27
     - TOX_ENV=pypy
     - TOX_ENV=py33
 
 install:
-  - pip install tox
+  - pip install -r requirements/test.txt
 
 script:
   - tox -e $TOX_ENV
