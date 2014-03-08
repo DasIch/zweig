@@ -847,3 +847,21 @@ def dump(node, annotate_fields=True, include_attributes=False):
             'expected AST, got {!r}'.format(node.__class__.__name__)
         )
     return _format(node)
+
+
+def is_possible_target(node):
+    """
+    Returns `True`, if the `node` could be a target for example in an
+    assignment statement ignoring the expression contexts.
+    """
+    return (
+        isinstance(node, (ast.Name, ast.Subscript, ast.Attribute)) or
+        isinstance(node, (ast.Tuple, ast.List)) and
+        all(
+            is_possible_target(element) or
+                not PY2 and
+                isinstance(element, ast.Starred) and
+                is_possible_target(element.value)
+            for element in node.elts
+        )
+    )

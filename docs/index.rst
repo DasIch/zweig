@@ -14,6 +14,8 @@ API Documentation
 
 .. autofunction:: dump
 
+.. autofunction:: is_possible_target
+
 
 .. include:: ../LICENSE.rst
 

@@ -16,6 +16,9 @@ import pytest
 import zweig
 
 
+PY2 = sys.version_info[0] == 2
+
+
 only_python2 = pytest.mark.skipif(
     sys.version_info[0] > 2,
     reason='only python 2'
@@ -488,3 +491,25 @@ def test_dump():
                 Str(s='and cheese', lineno=1, col_offset=11),
                 ], keywords=[], starargs=None, kwargs=None, lineno=1, col_offset=0), lineno=1, col_offset=0),
             ])""")
+
+
+@pytest.mark.parametrize(('source', 'is_target'), [
+    ('name', True),
+    ('foo, bar', True),
+    ('foo(), bar', False),
+    ('[foo, bar]', True),
+    ('[foo(), bar]', False),
+    ('sequence[0]', True),
+    ('foo.bar', True)
+] + [] if PY2 else [
+    ('foo, *bar', True),
+    ('*foo', False),
+    ('foo, *bar()', False)
+]
+)
+def test_is_possible_target(source, is_target):
+    module = ast.parse(source)
+    expression = module.body[0].value
+    print(zweig.to_source(expression))
+    print(zweig.dump(expression))
+    assert zweig.is_possible_target(expression) == is_target
