@@ -1,0 +1,17 @@
+language: python
+
+python:
+  - '2.7'
+
+env:
+  matrix:
+    - TOX_ENV=packaging
+    - TOX_ENV=py27
+    - TOX_ENV=pypy
+    - TOX_ENV=py33
+
+install:
+  - pip install tox
+
+script:
+  - tox -e $TOX_ENV
