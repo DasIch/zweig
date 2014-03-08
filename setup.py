@@ -10,10 +10,12 @@ from __future__ import unicode_literals
 from setuptools import setup
 from codecs import open
 
+from zweig import __version__
+
 
 setup(
     name='zweig',
-    version='0.1.0-dev',
+    version=__version__,
     url='https://github.com/DasIch/zweig',
     author='Daniel Neuhäuser',
     author_email='ich@daniel.neuhaeuser.de',
