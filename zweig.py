@@ -16,7 +16,7 @@ from itertools import chain
 from functools import reduce
 
 
-__version__ = '0.1.0-dev'
+__version__ = '0.1.0'
 __version_info__ = (0, 1, 0)
 
 

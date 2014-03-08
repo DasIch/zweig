@@ -27,6 +27,7 @@ Changelog
 
 .. changelog::
    :version: 0.1.0
+   :released: March 8th 2014
 
    .. change::
       :tags:
