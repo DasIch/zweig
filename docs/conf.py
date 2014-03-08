@@ -208,7 +208,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'Zweig.tex', 'Zweig Documentation',
-   'Daniel Neuhäuser', 'manual'),
+   u'Daniel Neuhäuser', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -238,7 +238,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'zweig', 'Zweig Documentation',
-     ['Daniel Neuhäuser'], 1)
+     [u'Daniel Neuhäuser'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -252,7 +252,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'Zweig', 'Zweig Documentation',
-   'Daniel Neuhäuser', 'Zweig', 'One line description of project.',
+   u'Daniel Neuhäuser', 'Zweig', 'One line description of project.',
    'Miscellaneous'),
 ]
 
