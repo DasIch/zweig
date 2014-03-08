@@ -16,6 +16,8 @@ API Documentation
 
 .. autofunction:: is_possible_target
 
+.. autofunction:: set_target_contexts
+
 
 .. include:: ../LICENSE.rst
 

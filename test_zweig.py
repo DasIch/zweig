@@ -513,3 +513,46 @@ def test_is_possible_target(source, is_target):
     print(zweig.to_source(expression))
     print(zweig.dump(expression))
     assert zweig.is_possible_target(expression) == is_target
+
+
+def test_set_target_contexts():
+    expression = ast.parse('name').body[0].value
+    zweig.set_target_contexts(expression)
+    assert isinstance(expression.ctx, ast.Store)
+
+    expression = ast.parse('foo.bar').body[0].value
+    zweig.set_target_contexts(expression)
+    assert isinstance(expression.ctx, ast.Store)
+
+    expression = ast.parse('foo[0]').body[0].value
+    zweig.set_target_contexts(expression)
+    assert isinstance(expression.ctx, ast.Store)
+
+    expression = ast.parse('foo, bar').body[0].value
+    zweig.set_target_contexts(expression)
+    assert isinstance(expression.ctx, ast.Store)
+    assert isinstance(expression.elts[0].ctx, ast.Store)
+    assert isinstance(expression.elts[1].ctx, ast.Store)
+
+    expression = ast.parse('[foo, bar]').body[0].value
+    zweig.set_target_contexts(expression)
+    assert isinstance(expression.ctx, ast.Store)
+    assert isinstance(expression.elts[0].ctx, ast.Store)
+    assert isinstance(expression.elts[1].ctx, ast.Store)
+
+    if not PY2:
+        expression = ast.parse('foo, *bar').body[0].value
+        zweig.set_target_contexts(expression)
+        assert isinstance(expression.ctx, ast.Store)
+        assert isinstance(expression.elts[0].ctx, ast.Store)
+        assert isinstance(expression.elts[1].ctx, ast.Store)
+        assert isinstance(expression.elts[1].value.ctx, ast.Store)
+
+        expression = ast.parse('foo, *[bar, bar]').body[0].value
+        zweig.set_target_contexts(expression)
+        assert isinstance(expression.ctx, ast.Store)
+        assert isinstance(expression.elts[0].ctx, ast.Store)
+        assert isinstance(expression.elts[1].ctx, ast.Store)
+        assert isinstance(expression.elts[1].value.ctx, ast.Store)
+        assert isinstance(expression.elts[1].value.elts[0].ctx, ast.Store)
+        assert isinstance(expression.elts[1].value.elts[1].ctx, ast.Store)

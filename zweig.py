@@ -865,3 +865,16 @@ def is_possible_target(node):
             for element in node.elts
         )
     )
+
+
+def set_target_contexts(node):
+    """
+    Given a node that could be a target, sets the `.ctx` attribute to
+    :class:`ast.Store` instances as appropriate.
+    """
+    node.ctx = ast.Store()
+    if isinstance(node, (ast.Tuple, ast.List)):
+        for element in node.elts:
+            set_target_contexts(element)
+    elif not PY2 and isinstance(node, ast.Starred):
+        set_target_contexts(node.value)
